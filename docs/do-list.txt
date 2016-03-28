@@ -1,0 +1,16 @@
+main
+	don't do initial scan when coming back from other activities
+
+scanner
+	make it possible to edit both default port numbers and rescan
+	
+video
+	make navigation bar semi-transparent
+	fix multicast support
+	swipe between cameras
+
+miscellaneous
+	post about it
+	create a view with multiple video fragments
+	test with higher (and lower) frame and bit rates
+	add localization for a few languages (French, German, ?)

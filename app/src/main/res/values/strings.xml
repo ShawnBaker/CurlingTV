@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright © 2016 Shawn Baker using the MIT License. -->
+<resources>
+    <string name="about">About</string>
+    <string name="app_name">Curling TV</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_all">Delete All</string>
+    <string name="done">Done</string>
+    <string name="error_bad_port" formatted="false">The port number must be between %d and %d.</string>
+    <string name="error_couldnt_connect">Couldn\'t connect to the camera.</string>
+    <string name="error_lost_connection">Lost the connection to the camera.</string>
+    <string name="error_no_port">You must enter a port number.</string>
+    <string name="get_name">get_name</string>
+    <string name="get_video_params">get_video_params</string>
+    <string name="get_video_port">get_video_port</string>
+    <string name="initializing_video">Initializing video...</string>
+    <string name="license">
+        Copyright \u00a9 2016 Shawn Baker\n\n
+        Monitor image by <a href="http://www.oxygen-icons.org">Oxygen Team</a>\n\n
+        This is an open source program.\n
+        It\'s available on <a href="https://github.com/ShawnBaker/CurlingTV">github</a>
+        under the <a href="https://opensource.org/licenses/MIT">MIT License</a>
+	</string>
+    <string name="no">No</string>
+    <string name="no_cameras">There are no cameras.</string>
+    <string name="num_new_cameras_found" formatted="false">Number of new cameras found: %d</string>
+    <string name="ok">OK</string>
+    <string name="ok_to_delete_all_cameras">Are you sure you want to delete all the cameras?</string>
+    <string name="port">Port</string>
+    <string name="save">SAVE</string>
+    <string name="scan">Scan</string>
+    <string name="scanning_for_cameras"><b>Scanning for Cameras</b></string>
+    <string name="scanning_on_port" formatted="false">Scanning on port %d</string>
+    <string name="settings">Settings</string>
+    <string name="settings_cameras">cameras</string>
+    <string name="settings_settings">settings</string>
+    <string name="version">Version</string>
+    <string name="video">Video</string>
+    <string name="yes">Yes</string>
+</resources>
