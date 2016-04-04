@@ -26,7 +26,7 @@ camera.resolution = (WIDTH, HEIGHT)
 camera.framerate = FPS
 camera.led = False
 output = MultiSocketOutput()
-camera.start_recording(output, format='h264')
+camera.start_recording(output, format='h264', bitrate=BPS)
 
 # create the socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -52,7 +52,7 @@ while True:
 	print 'command connection from ' + name
 	 
 	# start a new connection thread
-	thread = Connection(name, conn, output)
+	thread = Connection(name, conn, camera, output)
 	thread.start()
 	threads[name] = thread
 	
