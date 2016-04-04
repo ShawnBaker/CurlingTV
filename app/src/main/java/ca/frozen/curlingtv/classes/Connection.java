@@ -14,9 +14,14 @@ import ca.frozen.curlingtv.R;
 
 public class Connection
 {
+	// public constants
+	public final static int QUERY_TIMEOUT = 200;
+	public final static int COMMAND_TIMEOUT = 1000;
+	public final static int VIDEO_TIMEOUT = 400;
+	public final static int IMAGE_TIMEOUT = 400;
+
 	// local constants
 	private final static String TAG = "Connection";
-	private final static int SOCKET_TIMEOUT = 200;
 
 	// instance variables
 	private Socket socket = null;
@@ -26,19 +31,34 @@ public class Connection
 	//******************************************************************************
 	// Connection
 	//******************************************************************************
-	public Connection(String address, int port)
+	public Connection(String address, int port, int timeout)
 	{
 		try
 		{
 			socket = new Socket();
 			InetSocketAddress socketAddress = new InetSocketAddress(address, port);
-			socket.connect(socketAddress, SOCKET_TIMEOUT);
+			socket.connect(socketAddress, timeout);
 			inputStream = socket.getInputStream();
 			outputStream = socket.getOutputStream();
 		}
 		catch (Exception ex)
 		{
 			close();
+		}
+	}
+
+	//******************************************************************************
+	// read
+	//******************************************************************************
+	public int read(byte[] buffer, int offset, int count)
+	{
+		try
+		{
+			return (inputStream != null) ? inputStream.read(buffer, offset, count) : 0;
+		}
+		catch (IOException ex)
+		{
+			return 0;
 		}
 	}
 
@@ -193,7 +213,27 @@ public class Connection
 			if (len > 0)
 			{
 				port = Integer.parseInt(new String(buffer, 0, len));
-				Log.d(TAG, "port = " + port);
+				Log.d(TAG, "video port = " + port);
+			}
+		}
+		return port;
+	}
+
+	//******************************************************************************
+	// getImagePort
+	//******************************************************************************
+	public int getImagePort()
+	{
+		int port = 0;
+		if (isConnected())
+		{
+			write(App.getStr(R.string.get_image_port));
+			byte[] buffer = new byte[1024];
+			int len = read(buffer);
+			if (len > 0)
+			{
+				port = Integer.parseInt(new String(buffer, 0, len));
+				Log.d(TAG, "image port = " + port);
 			}
 		}
 		return port;

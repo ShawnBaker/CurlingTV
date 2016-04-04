@@ -230,7 +230,7 @@ public class ScannerFragment extends DialogFragment
 							try
 							{
 								// try to connect to the device
-								Connection reader = new Connection(address, settings.port);
+								Connection reader = new Connection(address, settings.port, Connection.QUERY_TIMEOUT);
 								if (reader.isConnected())
 								{
 									String name = reader.getName();

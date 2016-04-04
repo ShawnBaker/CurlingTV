@@ -100,13 +100,9 @@ public class CameraAdapter extends BaseAdapter
 			// get the camera for this row
 			Camera camera = getItem(position);
 
-			// get the views
+			// set the camera name
 			TextView name = (TextView) convertView.findViewById(R.id.camera_name);
-			TextView address = (TextView) convertView.findViewById(R.id.camera_address);
-
-			// set the views
 			name.setText(camera.name);
-			address.setText(Utils.getFullAddress(camera.address, camera.port));
 		}
 		else
 		{

@@ -80,6 +80,15 @@ public class MainActivity extends AppCompatActivity
 				startVideoActivity(adapter.getCameras().get(position));
 			}
 		});
+		listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
+		{
+			@Override
+			public boolean onItemLongClick(AdapterView<?> adaptr, View view, int position, long id)
+			{
+				startCameraActivity(adapter.getCameras().get(position));
+				return true;
+			}
+		});
 
 		// do a scan if there are no cameras
 		if (savedInstanceState == null && adapter.getCameras().size() == 0 && Utils.connectedToNetwork())
@@ -241,6 +250,16 @@ public class MainActivity extends AppCompatActivity
 		FragmentManager fm = getFragmentManager();
 		scannerFragment = new ScannerFragment();
 		scannerFragment.show(fm, "Scanner");
+	}
+
+	//******************************************************************************
+	// startCameraActivity
+	//******************************************************************************
+	private void startCameraActivity(Camera camera)
+	{
+		Intent intent = new Intent(App.getContext(), CameraActivity.class);
+		intent.putExtra(CameraActivity.CAMERA, camera);
+		startActivity(intent);
 	}
 
 	//******************************************************************************

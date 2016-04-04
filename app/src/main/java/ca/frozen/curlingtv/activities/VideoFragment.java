@@ -598,7 +598,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 
 				// create the command connection
 				buffer = new byte[BUFFER_SIZE];
-				commandConnection = new Connection(camera.address, camera.port);
+				commandConnection = new Connection(camera.address, camera.port, Connection.COMMAND_TIMEOUT);
 				if (!commandConnection.isConnected())
 				{
 					throw new Exception();
@@ -615,12 +615,11 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 
 				// get the video port and create the video connection
 				videoPort = commandConnection.getVideoPort();
-				videoConnection = new Connection(camera.address, videoPort);
+				videoConnection = new Connection(camera.address, videoPort, Connection.VIDEO_TIMEOUT);
 				if (!videoConnection.isConnected())
 				{
 					throw new Exception();
 				}
-				//hideMessage();
 
 				// read from the source
 				while (!Thread.interrupted())
@@ -741,10 +740,8 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 		public synchronized void cleanup()
 		{
 			// close the video connection
-			Log.d(TAG, "video connection");
 			if (videoConnection != null)
 			{
-				Log.d(TAG, "video connection not null");
 				try
 				{
 					videoConnection.close();
@@ -755,10 +752,8 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 			}
 
 			// close the command connection
-			Log.d(TAG, "command connection");
 			if (commandConnection != null)
 			{
-				Log.d(TAG, "command connection not null");
 				try
 				{
 					commandConnection.close();
@@ -769,10 +764,8 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 			}
 
 			// stop the decoder
-			Log.d(TAG, "decoder");
 			if (decoder != null)
 			{
-				Log.d(TAG, "decoder not null");
 				try
 				{
 					setDecodingState(false);

@@ -2,7 +2,10 @@
 <!-- Copyright © 2016 Shawn Baker using the MIT License. -->
 <resources>
     <string name="about">About</string>
+    <string name="address">Address</string>
     <string name="app_name">Curling TV</string>
+    <string name="bit_rate">Bit Rate</string>
+    <string name="camera">Camera</string>
     <string name="cancel">Cancel</string>
     <string name="delete_all">Delete All</string>
     <string name="done">Done</string>
@@ -10,6 +13,8 @@
     <string name="error_couldnt_connect">Couldn\'t connect to the camera.</string>
     <string name="error_lost_connection">Lost the connection to the camera.</string>
     <string name="error_no_port">You must enter a port number.</string>
+    <string name="frame_rate">Frame Rate</string>
+    <string name="get_image_port">get_image_port</string>
     <string name="get_name">get_name</string>
     <string name="get_video_params">get_video_params</string>
     <string name="get_video_port">get_video_port</string>
@@ -21,12 +26,14 @@
         It\'s available on <a href="https://github.com/ShawnBaker/CurlingTV">github</a>
         under the <a href="https://opensource.org/licenses/MIT">MIT License</a>
 	</string>
+    <string name="name">Name</string>
     <string name="no">No</string>
     <string name="no_cameras">There are no cameras.</string>
     <string name="num_new_cameras_found" formatted="false">Number of new cameras found: %d</string>
     <string name="ok">OK</string>
     <string name="ok_to_delete_all_cameras">Are you sure you want to delete all the cameras?</string>
     <string name="port">Port</string>
+    <string name="resolution">Resolution</string>
     <string name="save">SAVE</string>
     <string name="scan">Scan</string>
     <string name="scanning_for_cameras"><b>Scanning for Cameras</b></string>

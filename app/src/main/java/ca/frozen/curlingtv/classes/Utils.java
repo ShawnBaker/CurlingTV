@@ -220,23 +220,6 @@ public class Utils
 	}
 
 	//******************************************************************************
-	// findCamera
-	//******************************************************************************
-	public static Camera findCamera(Camera camera)
-	{
-		loadData();
-
-		for (Camera cam : cameras)
-		{
-			if (cam.network.equals(camera.network) && cam.name.equals(camera.name))
-			{
-				return camera;
-			}
-		}
-		return null;
-	}
-
-	//******************************************************************************
 	// getLocalIpAddress
 	//******************************************************************************
 	public static String getLocalIpAddress()
@@ -269,25 +252,6 @@ public class Utils
 		String ipAddress = getLocalIpAddress();
 		int i = ipAddress.lastIndexOf('.');
 		return ipAddress.substring(0, i + 1);
-	}
-
-	//******************************************************************************
-	// getFullAddress
-	//******************************************************************************
-	public static String getFullAddress(String baseAddress, int port)
-	{
-		String address = baseAddress;
-		int i = address.indexOf("://");
-		i = address.indexOf("/", (i != -1) ? (i + 3) : 0);
-		if (i != -1)
-		{
-			address = address.substring(0, i) + ":" + port + address.substring(i);
-		}
-		else
-		{
-			address += ":" + port;
-		}
-		return address;
 	}
 
 	//******************************************************************************
