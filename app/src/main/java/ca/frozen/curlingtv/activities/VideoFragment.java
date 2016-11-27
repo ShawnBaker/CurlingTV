@@ -37,6 +37,7 @@ import ca.frozen.curlingtv.classes.Camera;
 import ca.frozen.curlingtv.classes.Connection;
 import ca.frozen.curlingtv.classes.Utils;
 import ca.frozen.curlingtv.classes.VideoParams;
+import ca.frozen.library.views.ZoomPanTextureView;
 
 public class VideoFragment extends Fragment implements TextureView.SurfaceTextureListener
 {
@@ -63,16 +64,11 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 	private Camera camera;
 	private boolean fullScreen;
 	private DecoderThread decoder;
-	private TextureView textureView;
+	private ZoomPanTextureView textureView;
 	private TextView nameView, messageView;
 	private Button snapshotButton;
-	private ScaleGestureDetector scaleDetector;
-	private GestureDetector simpleDetector;
-	private float scale = 1;
-	private float panX = 0;
-	private float panY = 0;
-	private Runnable fadeInRunner, fadeOutRunner, finishRunner;
-	private Handler fadeInHandler, fadeOutHandler, finishHandler;
+	private Runnable fadeInRunner, fadeOutRunner, finishRunner, startVideoRunner;
+	private Handler fadeInHandler, fadeOutHandler, finishHandler, startVideoHandler;
 	private OnFadeListener fadeListener;
 
 	//******************************************************************************
@@ -105,10 +101,6 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 		// get the parameters
 		camera = getArguments().getParcelable(CAMERA);
 		fullScreen = getArguments().getBoolean(FULL_SCREEN);
-
-		// create the gesture recognizers
-		simpleDetector = new GestureDetector(getActivity(), new SimpleListener());
-		scaleDetector = new ScaleGestureDetector(getActivity(), new ScaleListener());
 
 		// create the fade in handler and runnable
 		fadeInHandler = new Handler();
@@ -158,6 +150,20 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 				getActivity().finish();
 			}
 		};
+
+		// create the start video handler and runnable
+		startVideoHandler = new Handler();
+		startVideoRunner = new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				MediaFormat format = decoder.getMediaFormat();
+				int videoWidth = format.getInteger(MediaFormat.KEY_WIDTH);
+				int videoHeight = format.getInteger(MediaFormat.KEY_HEIGHT);
+				textureView.setVideoSize(videoWidth, videoHeight);
+			}
+		};
 	}
 
 	//******************************************************************************
@@ -167,17 +173,6 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 		View view = inflater.inflate(R.layout.fragment_video, container, false);
-		view.setOnTouchListener(new View.OnTouchListener()
-		{
-			@Override
-			public boolean onTouch(View v, MotionEvent event)
-			{
-				simpleDetector.onTouchEvent(event);
-				scaleDetector.onTouchEvent(event);
-				return true;
-			}
-		});
-
 		// configure the name
 		nameView = (TextView) view.findViewById(R.id.video_name);
 		nameView.setText(camera.name);
@@ -188,8 +183,29 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 		messageView.setText(R.string.initializing_video);
 
 		// set the texture listener
-		textureView = (TextureView) view.findViewById(R.id.video_surface);
+		textureView = (ZoomPanTextureView)view.findViewById(R.id.video_surface);
 		textureView.setSurfaceTextureListener(this);
+		textureView.setZoomRange(MIN_ZOOM, MAX_ZOOM);
+		textureView.setOnTouchListener(new View.OnTouchListener()
+		{
+			@Override
+			public boolean onTouch(View v, MotionEvent e)
+			{
+				switch (e.getAction())
+				{
+					case MotionEvent.ACTION_DOWN:
+						stopFadeOutTimer();
+						break;
+					case MotionEvent.ACTION_UP:
+						if (e.getPointerCount() == 1)
+						{
+							startFadeOutTimer(false);
+						}
+						break;
+				}
+				return false;
+			}
+		});
 
 		// create the snapshot button
 		snapshotButton = (Button) view.findViewById(R.id.video_snapshot);
@@ -308,7 +324,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 	{
 		if (decoder != null)
 		{
-			decoder.setSurface(new Surface(surfaceTexture));
+			decoder.setSurface(new Surface(surfaceTexture), startVideoHandler, startVideoRunner);
 		}
 	}
 
@@ -328,7 +344,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 	{
 		if (decoder != null)
 		{
-			decoder.setSurface(null);
+			decoder.setSurface(null, null, null);
 		}
 		return true;
 	}
@@ -369,129 +385,6 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 		fadeOutHandler.removeCallbacks(fadeOutRunner);
 	}
 
-	//******************************************************************************
-	// adjustPan
-	//******************************************************************************
-	private boolean adjustPan(float scale)
-	{
-		boolean adjusted = false;
-		int w = textureView.getWidth();
-		int h = textureView.getHeight();
-		float dx = (w * scale - w) / 2;
-		float dy = (h * scale - h) / 2;
-		if (panX < -dx)
-		{
-			panX = -dx;
-			adjusted = true;
-		}
-		if (panX > dx)
-		{
-			panX = dx;
-			adjusted = true;
-		}
-		if (panY < -dy)
-		{
-			panY = -dy;
-			adjusted = true;
-		}
-		if (panY > dy)
-		{
-			panY = dy;
-			adjusted = true;
-		}
-		return adjusted;
-	}
-
-	////////////////////////////////////////////////////////////////////////////////
-	// SimpleListener
-	////////////////////////////////////////////////////////////////////////////////
-	private class SimpleListener extends GestureDetector.SimpleOnGestureListener
-	{
-		@Override
-		public boolean onDown(MotionEvent e)
-		{
-			startFadeOutTimer(false);
-			return false;
-		}
-
-		@Override
-		public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY)
-		{
-			startFadeOutTimer(false);
-			if (scale > 1)
-			{
-				panX -= distanceX;
-				panY -= distanceY;
-				adjustPan(scale);
-				textureView.setTranslationX(panX);
-				textureView.setTranslationY(panY);
-				return true;
-			}
-			return false;
-		}
-
-		@Override
-		public boolean onDoubleTap(MotionEvent e)
-		{
-			startFadeOutTimer(false);
-			scale = 1;
-			textureView.setScaleX(scale);
-			textureView.setScaleY(scale);
-			panX = panY = 0;
-			textureView.setTranslationX(panX);
-			textureView.setTranslationY(panY);
-			return true;
-		}
-	}
-
-	////////////////////////////////////////////////////////////////////////////////
-	// ScaleListener
-	////////////////////////////////////////////////////////////////////////////////
-	private class ScaleListener implements ScaleGestureDetector.OnScaleGestureListener
-	{
-		float startScale = 1;
-
-		@Override
-		public boolean onScale(ScaleGestureDetector detector)
-		{
-			float newScale = startScale * detector.getScaleFactor();
-			newScale = Math.max(MIN_ZOOM, Math.min(newScale, MAX_ZOOM));
-			textureView.setScaleX(newScale);
-			textureView.setScaleY(newScale);
-			if (newScale > 1)
-			{
-				if (adjustPan(newScale))
-				{
-					textureView.setTranslationX(panX);
-					textureView.setTranslationY(panY);
-				}
-			}
-			else if (panX != 0 || panY != 0)
-			{
-				panX = panY = 0;
-				textureView.setTranslationX(panX);
-				textureView.setTranslationY(panY);
-			}
-			return false;
-		}
-
-		@Override
-		public boolean onScaleBegin(ScaleGestureDetector detector)
-		{
-			stopFadeOutTimer();
-			startScale = scale;
-			return true;
-		}
-
-		@Override
-		public void onScaleEnd(ScaleGestureDetector detector)
-		{
-			float newScale = startScale * detector.getScaleFactor();
-			scale = Math.max(0.1f, Math.min(newScale, 10));
-			startFadeOutTimer(false);
-		}
-	}
-
 	////////////////////////////////////////////////////////////////////////////////
 	// DecoderThread
 	////////////////////////////////////////////////////////////////////////////////
@@ -514,13 +407,17 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 		private int videoPort;
 		private Connection commandConnection = null;
 		private Connection videoConnection = null;
+		private Handler startVideoHandler;
+		private Runnable startVideoRunner;
 
 		//******************************************************************************
 		// setSurface
 		//******************************************************************************
-		public void setSurface(Surface surface)
+		public void setSurface(Surface surface, Handler handler, Runnable runner)
 		{
 			this.surface = surface;
+			this.startVideoHandler = handler;
+			this.startVideoRunner = runner;
 			if (decoder != null)
 			{
 				if (surface != null)
@@ -552,6 +449,14 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 					setDecodingState(false);
 				}
 			}
+		}
+
+		//******************************************************************************
+		// getMediaFormat
+		//******************************************************************************
+		public MediaFormat getMediaFormat()
+		{
+			return format;
 		}
 
 		//******************************************************************************
@@ -651,6 +556,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 											if (!gotSPS && (nal[numZeroes + 1] & 0x1F) == 7)
 											{
 												hideMessage();
+												startVideoHandler.post(startVideoRunner);
 												gotSPS = true;
 											}
 											if (gotSPS)

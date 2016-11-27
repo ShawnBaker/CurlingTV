@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/CurlingTV.iml" filepath="$PROJECT_DIR$/CurlingTV.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ca.frozen.library/ca.frozen.library.iml" filepath="$PROJECT_DIR$/ca.frozen.library/ca.frozen.library.iml" />
     </modules>
   </component>
 </project>
