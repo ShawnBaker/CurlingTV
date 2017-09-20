@@ -1,4 +1,4 @@
-// Copyright © 2016 Shawn Baker using the MIT License.
+// Copyright © 2016-2017 Shawn Baker using the MIT License.
 package ca.frozen.curlingtv.activities;
 
 import android.app.AlertDialog;
@@ -11,11 +11,8 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.ContextMenu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,6 +22,7 @@ import android.widget.ListView;
 import java.util.Collections;
 import java.util.List;
 
+import ca.frozen.library.classes.Log;
 import ca.frozen.curlingtv.App;
 import ca.frozen.curlingtv.classes.Camera;
 import ca.frozen.curlingtv.classes.CameraAdapter;
@@ -33,9 +31,6 @@ import ca.frozen.curlingtv.R;
 
 public class MainActivity extends AppCompatActivity
 {
-	// local constants
-	private final static String TAG = "MainActivity";
-
 	// instance variables
 	private CameraAdapter adapter;
 	private ScannerFragment scannerFragment;
@@ -52,12 +47,15 @@ public class MainActivity extends AppCompatActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		// create the toolbar
-		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-		setSupportActionBar(toolbar);
+		// initialize the logger
+		Utils.initLogFile(getClass().getSimpleName());
 
 		// load the settings and cameras
 		Utils.loadData();
+
+		// create the toolbar
+		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		setSupportActionBar(toolbar);
 
 		// set the list adapter
 		adapter = new CameraAdapter(new View.OnClickListener()
@@ -93,6 +91,7 @@ public class MainActivity extends AppCompatActivity
 		// do a scan if there are no cameras
 		if (savedInstanceState == null && adapter.getCameras().size() == 0 && Utils.connectedToNetwork())
 		{
+			Log.info("starting auto scan");
 			Handler handler = new Handler();
 			handler.postDelayed(new Runnable()
 			{
@@ -139,6 +138,7 @@ public class MainActivity extends AppCompatActivity
 	@Override
 	public void onResume()
 	{
+		Log.setTag(getClass().getSimpleName());
 		super.onResume();
 		Utils.reloadData();
 		adapter.refresh();
@@ -188,6 +188,7 @@ public class MainActivity extends AppCompatActivity
 		// scan for cameras
 		if (id == R.id.action_scan)
 		{
+			Log.info("menu: scan");
 			startScanner();
 			return true;
 		}
@@ -195,6 +196,7 @@ public class MainActivity extends AppCompatActivity
 		// delete all the cameras
 		else if (id == R.id.action_delete_all)
 		{
+			Log.info("menu: delete all");
 			AlertDialog.Builder alert = new AlertDialog.Builder(this);
 			alert.setMessage(R.string.ok_to_delete_all_cameras);
 			alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener()
@@ -202,6 +204,7 @@ public class MainActivity extends AppCompatActivity
 				@Override
 				public void onClick(DialogInterface dialog, int which)
 				{
+					Log.info("menu: deleting all cameras");
 					List<Camera> allCameras = Utils.getCameras();
 					for (Camera camera : adapter.getCameras())
 					{
@@ -226,7 +229,17 @@ public class MainActivity extends AppCompatActivity
 		// edit the settings
 		else if (id == R.id.action_settings)
 		{
+			Log.info("menu: settings");
 			Intent intent = new Intent(this, SettingsActivity.class);
+			startActivity(intent);
+			return true;
+		}
+
+		// display the log files
+		else if (id == R.id.action_log_files)
+		{
+			Log.info("menu: log files");
+			Intent intent = new Intent(this, LogFilesActivity.class);
 			startActivity(intent);
 			return true;
 		}
@@ -234,6 +247,7 @@ public class MainActivity extends AppCompatActivity
 		// display the about information
         else if (id == R.id.action_about)
         {
+			Log.info("menu: about");
             Intent intent = new Intent(this, AboutActivity.class);
             startActivity(intent);
             return true;

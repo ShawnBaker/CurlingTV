@@ -1,7 +1,5 @@
-// Copyright © 2016 Shawn Baker using the MIT License.
+// Copyright © 2016-2017 Shawn Baker using the MIT License.
 package ca.frozen.curlingtv.classes;
-
-import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,19 +7,17 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import ca.frozen.library.classes.Log;
 import ca.frozen.curlingtv.App;
 import ca.frozen.curlingtv.R;
 
 public class Connection
 {
 	// public constants
-	public final static int QUERY_TIMEOUT = 200;
+	public final static int QUERY_TIMEOUT = 500;
 	public final static int COMMAND_TIMEOUT = 1000;
 	public final static int VIDEO_TIMEOUT = 400;
 	public final static int IMAGE_TIMEOUT = 400;
-
-	// local constants
-	private final static String TAG = "Connection";
 
 	// instance variables
 	private Socket socket = null;
@@ -43,6 +39,7 @@ public class Connection
 		}
 		catch (Exception ex)
 		{
+			Log.error("Connection: " + ex.toString());
 			close();
 		}
 	}
@@ -58,6 +55,7 @@ public class Connection
 		}
 		catch (IOException ex)
 		{
+			Log.error("read: " + ex.toString());
 			return 0;
 		}
 	}
@@ -73,6 +71,7 @@ public class Connection
 		}
 		catch (IOException ex)
 		{
+			Log.error("read: " + ex.toString());
 			return 0;
 		}
 	}
@@ -89,7 +88,10 @@ public class Connection
 				outputStream.write(buffer, offset, count);
 			}
 		}
-		catch (IOException ex) {}
+		catch (IOException ex)
+		{
+			Log.error("write: " + ex.toString());
+		}
 	}
 
 	//******************************************************************************
@@ -164,7 +166,7 @@ public class Connection
 			if (len > 0)
 			{
 				name = new String(buffer, 0, len);
-				Log.d(TAG, "name = " + name);
+				Log.info("getName: " + name);
 			}
 		}
 		return name;
@@ -191,7 +193,7 @@ public class Connection
 					params.height = Integer.parseInt(parts[1]);
 					params.fps = Integer.parseInt(parts[2]);
 					params.bps = Integer.parseInt(parts[3]);
-					Log.d(TAG, "params = " + params.width + " " + params.height + " " + params.fps + " " + params.bps);
+					Log.info("getVideoParams: " + params.toString());
 				}
 			}
 		}
@@ -213,7 +215,7 @@ public class Connection
 			if (len > 0)
 			{
 				port = Integer.parseInt(new String(buffer, 0, len));
-				Log.d(TAG, "video port = " + port);
+				Log.info("video port = " + port);
 			}
 		}
 		return port;
@@ -233,7 +235,7 @@ public class Connection
 			if (len > 0)
 			{
 				port = Integer.parseInt(new String(buffer, 0, len));
-				Log.d(TAG, "image port = " + port);
+				Log.info("image port = " + port);
 			}
 		}
 		return port;

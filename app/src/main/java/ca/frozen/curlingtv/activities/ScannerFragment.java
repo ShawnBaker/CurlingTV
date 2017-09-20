@@ -1,4 +1,4 @@
-// Copyright © 2016 Shawn Baker using the MIT License.
+// Copyright © 2016-2017 Shawn Baker using the MIT License.
 package ca.frozen.curlingtv.activities;
 
 import android.app.Dialog;
@@ -21,6 +21,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.frozen.library.classes.Log;
 import ca.frozen.curlingtv.App;
 import ca.frozen.curlingtv.classes.Camera;
 import ca.frozen.curlingtv.classes.Connection;
@@ -30,9 +31,6 @@ import ca.frozen.curlingtv.R;
 
 public class ScannerFragment extends DialogFragment
 {
-	// local constants
-	private final static String TAG = "ScannerFragment";
-
 	// instance variables
 	private WeakReference<DeviceScanner> scannerWeakRef;
 	private TextView message, status;
@@ -49,6 +47,9 @@ public class ScannerFragment extends DialogFragment
 	{
 		super.onCreate(savedInstanceState);
 		setRetainInstance(true);
+
+		// initialize the logger
+		Utils.initLogFile(getClass().getSimpleName());
 
 		// load the settings and cameras
 		Utils.loadData();
@@ -151,6 +152,7 @@ public class ScannerFragment extends DialogFragment
 	//******************************************************************************
 	private void cancel()
 	{
+		Log.info("cancel");
 		DeviceScanner scanner = (scannerWeakRef != null) ? scannerWeakRef.get() : null;
 		if (scanner != null)
 		{
@@ -164,7 +166,6 @@ public class ScannerFragment extends DialogFragment
 	private class DeviceScanner extends AsyncTask<Void, Void, Void>
 	{
 		// local constants
-		private final static String TAG = "DeviceScanner";
 		private final static int NO_DEVICE = -1;
 		private final static int NUM_THREADS = 42;
 		private final static int SLEEP_TIMEOUT = 10;
@@ -199,6 +200,7 @@ public class ScannerFragment extends DialogFragment
 			numDone = 0;
 			networkCameras = Utils.getNetworkCameras(network);
 			newCameras = new ArrayList<>();
+			Log.info("onPreExecute: " + network + "," + ipAddress + "," + settings.toString());
 		}
 
 		//******************************************************************************
@@ -207,6 +209,7 @@ public class ScannerFragment extends DialogFragment
 		@Override
 		protected Void doInBackground(Void... params)
 		{
+			Log.info("doInBackground");
 			if (ipAddress != null && !ipAddress.isEmpty())
 			{
 				int i = ipAddress.lastIndexOf('.');
@@ -275,6 +278,7 @@ public class ScannerFragment extends DialogFragment
 		@Override
 		protected void onPostExecute(Void unused)
 		{
+			Log.info("onPostExecute");
 			final MainActivity activity = getActivity(cancelButton);
 			if (activity != null)
 			{
@@ -299,10 +303,12 @@ public class ScannerFragment extends DialogFragment
 		private void addCameras()
 		{
 			// add the new cameras to the list of all cameras
+			Log.info("addCameras");
 			List<Camera> allCameras = Utils.getCameras();
 			for (Camera camera : newCameras)
 			{
 				allCameras.add(camera);
+				Log.info("camera: " + camera.toString());
 			}
 		}
 
@@ -322,6 +328,7 @@ public class ScannerFragment extends DialogFragment
 			}
 			if (!found)
 			{
+				Log.info("addCamera: " + newCamera.toString());
 				newCameras.add(newCamera);
 			}
 		}

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright © 2016 Shawn Baker using the MIT License. -->
+<!-- Copyright © 2016-2017 Shawn Baker using the MIT License. -->
 <resources>
     <string name="about">About</string>
     <string name="address">Address</string>
@@ -7,12 +7,18 @@
     <string name="bit_rate">Bit Rate</string>
     <string name="camera">Camera</string>
     <string name="cancel">Cancel</string>
+    <string name="clear">Clear</string>
     <string name="delete_all">Delete All</string>
     <string name="done">Done</string>
+    <string name="email">Email</string>
+    <string name="email_address">support@frozen.ca</string>
     <string name="error_bad_port" formatted="false">The port number must be between %d and %d.</string>
     <string name="error_couldnt_connect">Couldn\'t connect to the camera.</string>
     <string name="error_lost_connection">Lost the connection to the camera.</string>
     <string name="error_no_port">You must enter a port number.</string>
+    <string name="file_1">File 1</string>
+    <string name="file_2">File 2</string>
+    <string name="file_provider">ca.frozen.curlingtv.fileprovider</string>
     <string name="frame_rate">Frame Rate</string>
     <string name="get_image_port">get_image_port</string>
     <string name="get_name">get_name</string>
@@ -20,17 +26,22 @@
     <string name="get_video_port">get_video_port</string>
     <string name="initializing_video">Initializing video...</string>
     <string name="license">
-        Copyright \u00a9 2016 Shawn Baker\n\n
+        Copyright \u00a9 2016-2017 Shawn Baker\n\n
         Monitor image by <a href="http://www.oxygen-icons.org">Oxygen Team</a>\n\n
         This is an open source program.\n
         It\'s available on <a href="https://github.com/ShawnBaker/CurlingTV">github</a>
         under the <a href="https://opensource.org/licenses/MIT">MIT License</a>
 	</string>
+    <string name="loading">Loading...</string>
+    <string name="log_files">Log Files</string>
     <string name="name">Name</string>
     <string name="no">No</string>
     <string name="no_cameras">There are no cameras.</string>
+    <string name="no_file_1">Log file 1 doesn\'t exist.</string>
+    <string name="no_file_2">Log file 2 doesn\'t exist.</string>
     <string name="num_new_cameras_found" formatted="false">Number of new cameras found: %d</string>
     <string name="ok">OK</string>
+    <string name="ok_to_clear_logs">Are you sure you want to delete the contents of the log files?</string>
     <string name="ok_to_delete_all_cameras">Are you sure you want to delete all the cameras?</string>
     <string name="port">Port</string>
     <string name="resolution">Resolution</string>

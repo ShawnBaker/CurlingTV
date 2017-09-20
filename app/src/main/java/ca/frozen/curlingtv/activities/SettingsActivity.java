@@ -1,4 +1,4 @@
-// Copyright © 2016 Shawn Baker using the MIT License.
+// Copyright © 2016-2017 Shawn Baker using the MIT License.
 package ca.frozen.curlingtv.activities;
 
 import android.support.v7.app.AppCompatActivity;
@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
-import android.widget.Spinner;
 
 import ca.frozen.curlingtv.App;
 import ca.frozen.curlingtv.classes.Settings;
@@ -15,9 +14,6 @@ import ca.frozen.curlingtv.R;
 
 public class SettingsActivity extends AppCompatActivity
 {
-	// local constants
-	private final static String TAG = "SettingsActivity";
-
 	// instance variables
 	private EditText portEdit;
 	private Settings settings;
@@ -31,6 +27,9 @@ public class SettingsActivity extends AppCompatActivity
 		// configure the activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_settings);
+
+		// initialize the logger
+		Utils.initLogFile(getClass().getSimpleName());
 
 		// get the settings
 		settings = (savedInstanceState == null)

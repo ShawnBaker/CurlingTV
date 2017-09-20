@@ -1,4 +1,4 @@
-// Copyright © 2016 Shawn Baker using the MIT License.
+// Copyright © 2016-2017 Shawn Baker using the MIT License.
 package ca.frozen.curlingtv.classes;
 
 import android.os.Parcel;
@@ -16,7 +16,6 @@ public class VideoParams implements Parcelable
 	//******************************************************************************
 	public VideoParams()
 	{
-		//Log.d(TAG, "init: " + toString());
 	}
 
 	//******************************************************************************
@@ -25,7 +24,6 @@ public class VideoParams implements Parcelable
 	public VideoParams(Parcel in)
 	{
 		readFromParcel(in);
-		//Log.d(TAG, "parcel: " + toString());
 	}
 
 	//******************************************************************************
@@ -73,4 +71,13 @@ public class VideoParams implements Parcelable
 			return new VideoParams[size];
 		}
 	};
+
+	//******************************************************************************
+	// toString
+	//******************************************************************************
+	@Override
+	public String toString()
+	{
+		return width + "x" + height + "," + fps + "," + bps;
+	}
 }

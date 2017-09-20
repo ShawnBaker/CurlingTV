@@ -1,4 +1,4 @@
-// Copyright © 2016 Shawn Baker using the MIT License.
+// Copyright © 2016-2017 Shawn Baker using the MIT License.
 package ca.frozen.curlingtv.classes;
 
 import android.os.Parcel;
@@ -12,9 +12,6 @@ import ca.frozen.curlingtv.R;
 
 public class Settings implements Parcelable
 {
-	// local constants
-	private final static String TAG = "Settings";
-
 	// instance variables
 	public int port;
 
@@ -24,7 +21,7 @@ public class Settings implements Parcelable
 	public Settings()
 	{
 		port = App.getInt(R.integer.default_port);
-		//Log.d(TAG, "init: " + toString());
+		//Log.info("init: " + toString());
 	}
 
 	//******************************************************************************
@@ -33,7 +30,7 @@ public class Settings implements Parcelable
 	public Settings(Parcel in)
 	{
 		readFromParcel(in);
-		//Log.d(TAG, "parcel: " + toString());
+		//Log.info("parcel: " + toString());
 	}
 
 	//******************************************************************************
@@ -42,7 +39,7 @@ public class Settings implements Parcelable
 	public Settings(Settings settings)
 	{
 		port = settings.port;
-		//Log.d(TAG, "settings: " + toString());
+		//Log.info("settings: " + toString());
 	}
 
 	//******************************************************************************
@@ -58,7 +55,7 @@ public class Settings implements Parcelable
 		{
 			port = App.getInt(R.integer.default_port);
 		}
-		//Log.d(TAG, "json: " + toString());
+		//Log.info("json: " + toString());
 	}
 
 	//******************************************************************************

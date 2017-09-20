@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright © 2016 Shawn Baker using the MIT License. -->
+<!-- Copyright © 2016-2017 Shawn Baker using the MIT License. -->
 <resources>
     <color name="accent">#0080FF</color>
     <color name="activity_background">#F9FAFF</color>
     <color name="bad_text">#FF0000</color>
+    <color name="button_text">#FFFFFF</color>
     <color name="good_text">#00C000</color>
     <color name="primary">#005FD3</color>
     <color name="primary_dark">#00335D</color>

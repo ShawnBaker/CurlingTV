@@ -1,4 +1,4 @@
-// Copyright © 2016 Shawn Baker using the MIT License.
+// Copyright © 2016-2017 Shawn Baker using the MIT License.
 package ca.frozen.curlingtv.activities;
 
 import android.graphics.Bitmap;
@@ -6,10 +6,10 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import ca.frozen.library.classes.Log;
 import ca.frozen.curlingtv.classes.Camera;
 import ca.frozen.curlingtv.classes.Connection;
 import ca.frozen.curlingtv.classes.Utils;
@@ -20,9 +20,6 @@ public class CameraActivity extends AppCompatActivity
 {
 	// public constants
 	public final static String CAMERA = "camera";
-
-	// local constants
-	private final static String TAG = "CameraActivity";
 
 	// instance variables
 	private Camera camera;
@@ -39,12 +36,16 @@ public class CameraActivity extends AppCompatActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_camera);
 
+		// initialize the logger
+		Utils.initLogFile(getClass().getSimpleName());
+
 		// load the settings and cameras
 		Utils.loadData();
 
 		// get the camera object
 		Bundle data = getIntent().getExtras();
 		camera = data.getParcelable(CAMERA);
+		Log.info("camera: " + (camera.name.isEmpty() ? "new" : camera.name));
 
 		// set the name
 		TextView textView = (TextView) findViewById(R.id.camera_name);
@@ -110,6 +111,7 @@ public class CameraActivity extends AppCompatActivity
 		textView.setText(Integer.toString(videoParams.fps));
 		textView = (TextView) findViewById(R.id.camera_bit_rate);
 		textView.setText(Integer.toString(videoParams.bps));
+		Log.info("videoParams: " + videoParams.toString());
 	}
 
 	//******************************************************************************
@@ -162,7 +164,7 @@ public class CameraActivity extends AppCompatActivity
 			{
 				byte[] buffer = new byte[4];
 				int len = imageConnection.read(buffer);
-				Log.d(TAG, String.format("len = %d", len));
+				Log.info(String.format("len = %d", len));
 				if (len == 4)
 				{
 					int imageSize = 0;
@@ -170,14 +172,14 @@ public class CameraActivity extends AppCompatActivity
 					{
 						imageSize = (imageSize << 8) + (buffer[i] & 0xFF);
 					}
-					Log.d(TAG, String.format("numBytes = %d", imageSize));
+					Log.info(String.format("numBytes = %d", imageSize));
 					buffer = new byte[imageSize];
 					len = 0;
 					while (len < imageSize)
 					{
 						len += imageConnection.read(buffer, len, imageSize - len);
 					}
-					Log.d(TAG, String.format("len = %d", len));
+					Log.info(String.format("len = %d", len));
 					image = BitmapFactory.decodeByteArray(buffer, 0, len);
 				}
 			}

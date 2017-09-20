@@ -1,13 +1,13 @@
-// Copyright © 2016 Shawn Baker using the MIT License.
+// Copyright © 2016-2017 Shawn Baker using the MIT License.
 package ca.frozen.curlingtv.activities;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import ca.frozen.library.classes.Log;
 import ca.frozen.curlingtv.classes.Camera;
 import ca.frozen.curlingtv.classes.Utils;
 import ca.frozen.curlingtv.R;
@@ -16,9 +16,6 @@ public class VideoActivity extends AppCompatActivity implements VideoFragment.On
 {
 	// public constants
 	public final static String CAMERA = "camera";
-
-	// local constants
-	private final static String TAG = "VideoActivity";
 
 	// instance variables
 	private Camera camera;
@@ -34,7 +31,9 @@ public class VideoActivity extends AppCompatActivity implements VideoFragment.On
 		// configure the activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_video);
-		Log.d(TAG, "onCreate");
+
+		// initialize the logger
+		Utils.initLogFile(getClass().getSimpleName());
 
 		// load the settings and cameras
 		Utils.loadData();

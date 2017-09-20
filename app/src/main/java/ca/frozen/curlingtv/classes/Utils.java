@@ -1,4 +1,4 @@
-// Copyright © 2016 Shawn Baker using the MIT License.
+// Copyright © 2016-2017 Shawn Baker using the MIT License.
 package ca.frozen.curlingtv.classes;
 
 import android.content.ContentResolver;
@@ -33,6 +33,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 
+import ca.frozen.library.classes.Log;
 import ca.frozen.curlingtv.App;
 import ca.frozen.curlingtv.R;
 
@@ -326,7 +327,7 @@ public class Utils
 			File rpi = new File(pictures, App.getStr(R.string.app_name));
 			if (!rpi.exists())
 			{
-				rpi.mkdir();
+				rpi.mkdirs();
 			}
 
 			// save the file within the snapshots folder
@@ -372,5 +373,15 @@ public class Utils
 		String name = orientation == Configuration.ORIENTATION_PORTRAIT ? "navigation_bar_height" : "navigation_bar_height_landscape";
 		int id = resources.getIdentifier(name, "dimen", "android");
 		return (id > 0) ?resources.getDimensionPixelSize(id) : 0;
+	}
+
+	//******************************************************************************
+	// initLogFile
+	//******************************************************************************
+	public static void initLogFile(String tag)
+	{
+		String baseFileName = App.getStr(R.string.app_name).replaceAll("\\s+", "");
+		Log.init(App.getContext(), tag, baseFileName);
+		Log.info("onCreate");
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright © 2016 Shawn Baker using the MIT License.
+// Copyright © 2016-2017 Shawn Baker using the MIT License.
 package ca.frozen.curlingtv.classes;
 
 import android.os.Parcel;
@@ -9,9 +9,6 @@ import org.json.JSONObject;
 
 public class Camera implements Comparable, Parcelable
 {
-	// local constants
-	private final static String TAG = "Camera";
-
 	// instance variables
 	public String network;
 	public String name;
@@ -27,7 +24,7 @@ public class Camera implements Comparable, Parcelable
         this.name = name;
 		this.address = address;
 		this.port = port;
-		//Log.d(TAG, "address/source: " + toString());
+		//Log.info("address/source: " + toString());
 	}
 
 	//******************************************************************************
@@ -39,7 +36,7 @@ public class Camera implements Comparable, Parcelable
 		name = camera.name;
 		address = camera.address;
 		port = camera.port;
-		//Log.d(TAG, "camera: " + toString());
+		//Log.info("camera: " + toString());
 	}
 
 	//******************************************************************************
@@ -48,7 +45,7 @@ public class Camera implements Comparable, Parcelable
 	public Camera(Parcel in)
 	{
 		readFromParcel(in);
-		//Log.d(TAG, "parcel: " + toString());
+		//Log.info("parcel: " + toString());
 	}
 
 	//******************************************************************************
@@ -67,7 +64,7 @@ public class Camera implements Comparable, Parcelable
 		{
 			initialize();
 		}
-		//Log.d(TAG, "json: " + toString());
+		//Log.info("json: " + toString());
 	}
 
 	//******************************************************************************

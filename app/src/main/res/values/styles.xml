@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright © 2016 Shawn Baker using the MIT License. -->
+<!-- Copyright © 2016-2017 Shawn Baker using the MIT License. -->
 <resources>
 
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">

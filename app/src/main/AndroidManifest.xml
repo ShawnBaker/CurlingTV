@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright © 2016 Shawn Baker using the MIT License. -->
+<!-- Copyright © 2016-2017 Shawn Baker using the MIT License. -->
 <manifest package="ca.frozen.curlingtv"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -10,14 +10,14 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
-        android:name="ca.frozen.curlingtv.App"
+        android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="ca.frozen.curlingtv.activities.MainActivity"
+            android:name=".activities.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -26,29 +26,44 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="ca.frozen.curlingtv.activities.AboutActivity"
+            android:name=".activities.AboutActivity"
             android:label="@string/about"
-            android:parentActivityName="ca.frozen.curlingtv.activities.MainActivity" >
+            android:parentActivityName=".activities.MainActivity" >
         </activity>
         <activity
-            android:name="ca.frozen.curlingtv.activities.CameraActivity"
+            android:name=".activities.CameraActivity"
             android:label="@string/camera"
-            android:parentActivityName="ca.frozen.curlingtv.activities.MainActivity" >
+            android:parentActivityName=".activities.MainActivity" >
         </activity>
         <activity
-            android:name="ca.frozen.curlingtv.activities.SettingsActivity"
+            android:name=".activities.LogFilesActivity"
+            android:label="@string/log_files"
+            android:parentActivityName=".activities.MainActivity" >
+        </activity>
+        <activity
+            android:name=".activities.SettingsActivity"
             android:label="@string/settings"
             android:launchMode="singleTop"
             android:theme="@style/AppBackAsCancelTheme"
-            android:parentActivityName="ca.frozen.curlingtv.activities.MainActivity" >
+            android:parentActivityName=".activities.MainActivity" >
         </activity>
         <activity
-            android:name="ca.frozen.curlingtv.activities.VideoActivity"
+            android:name=".activities.VideoActivity"
             android:label="@string/video"
             android:theme="@style/AppFullScreenTheme"
             android:screenOrientation="sensorLandscape"
-            android:parentActivityName="ca.frozen.curlingtv.activities.MainActivity" >
+            android:parentActivityName=".activities.MainActivity" >
         </activity>
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="@string/file_provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+
+        </provider>
     </application>
 
 </manifest>

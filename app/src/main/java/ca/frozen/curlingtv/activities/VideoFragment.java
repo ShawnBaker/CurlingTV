@@ -1,4 +1,4 @@
-// Copyright © 2016 Shawn Baker using the MIT License.
+// Copyright © 2016-2017 Shawn Baker using the MIT License.
 package ca.frozen.curlingtv.activities;
 
 import android.app.Activity;
@@ -12,11 +12,8 @@ import android.media.MediaFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.util.Log;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
@@ -31,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 
+import ca.frozen.library.classes.Log;
 import ca.frozen.curlingtv.App;
 import ca.frozen.curlingtv.R;
 import ca.frozen.curlingtv.classes.Camera;
@@ -53,7 +51,6 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 	public final static String FULL_SCREEN = "full_screen";
 
 	// local constants
-	private final static String TAG = "VideoFragment";
 	private final static float MIN_ZOOM = 0.1f;
 	private final static float MAX_ZOOM = 10;
 	private final static int FADEOUT_TIMEOUT = 5000;
@@ -94,6 +91,9 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 	{
 		// configure the activity
 		super.onCreate(savedInstanceState);
+
+		// initialize the logger
+		Utils.initLogFile(getClass().getSimpleName());
 
 		// load the settings and cameras
 		Utils.loadData();
@@ -391,7 +391,6 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 	private class DecoderThread extends Thread
 	{
 		// local constants
-		private final static String TAG = "DecoderThread";
 		private final static int BUFFER_TIMEOUT = 10000;
 		private final static int FINISH_TIMEOUT = 5000;
 		private final static int BUFFER_SIZE = 16384;
@@ -532,7 +531,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 					// read from the stream
 					int len = videoConnection.read(buffer);
 					if (Thread.interrupted()) break;
-					//Log.d(TAG, String.format("len = %d", len));
+					//Log.info(String.format("len = %d", len));
 
 					// process the input buffer
 					if (len > 0)
@@ -573,7 +572,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 													if (Thread.interrupted()) break;
 												}
 											}
-											//Log.d(TAG, String.format("NAL: %d  %d", nalLen, index));
+											//Log.info(String.format("NAL: %d  %d", nalLen, index));
 										}
 										for (int j = 0; j < numZeroes; j++)
 										{
@@ -592,7 +591,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 								if (nalLen == nal.length)
 								{
 									nal = Arrays.copyOf(nal, nal.length + NAL_SIZE_INC);
-									//Log.d(TAG, String.format("NAL size: %d", nal.length));
+									//Log.info(String.format("NAL size: %d", nal.length));
 								}
 								nal[nalLen++] = buffer[i];
 							}
@@ -606,7 +605,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 							setMessage(R.string.error_lost_connection);
 							break;
 						}
-						//Log.d(TAG, "len == 0");
+						//Log.info("len == 0");
 					}
 
 					// send an output buffer to the surface
@@ -632,7 +631,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 				{
 					setMessage(R.string.error_lost_connection);
 				}
-				//Log.d(TAG, ex.toString());
+				//Log.info(ex.toString());
 				ex.printStackTrace();
 			}
 
@@ -651,7 +650,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 				try
 				{
 					videoConnection.close();
-					Log.d(TAG, "video connection closed");
+					Log.info("video connection closed");
 				}
 				catch (Exception ex) {}
 				videoConnection = null;
@@ -663,7 +662,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 				try
 				{
 					commandConnection.close();
-					Log.d(TAG, "command connection closed");
+					Log.info("command connection closed");
 				}
 				catch (Exception ex) {}
 				commandConnection = null;
@@ -676,7 +675,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 				{
 					setDecodingState(false);
 					decoder.release();
-					Log.d(TAG, "decoder released");
+					Log.info("decoder released");
 				}
 				catch (Exception ex) {}
 				decoder = null;
