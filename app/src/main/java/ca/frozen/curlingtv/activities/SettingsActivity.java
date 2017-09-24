@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 
+import ca.frozen.library.classes.Log;
 import ca.frozen.curlingtv.App;
 import ca.frozen.curlingtv.classes.Settings;
 import ca.frozen.curlingtv.classes.Utils;
@@ -35,6 +36,7 @@ public class SettingsActivity extends AppCompatActivity
 		settings = (savedInstanceState == null)
 						? new Settings(Utils.getSettings())
 						: (Settings) savedInstanceState.getParcelable("settings");
+		Log.info(settings.toString());
 
 		portEdit = (EditText) findViewById(R.id.settings_port);
 		portEdit.setText(Integer.toString(settings.port));
@@ -74,6 +76,7 @@ public class SettingsActivity extends AppCompatActivity
 		{
 			if (getAndCheckSettings())
 			{
+				Log.info("menu: save " + settings.toString());
 				Utils.setSettings(settings);
 				Utils.saveData();
 				finish();
