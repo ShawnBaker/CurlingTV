@@ -27,19 +27,24 @@ class Connection (threading.Thread):
 		while True:
 			 
 			# read a command from the client
-			command = self.command_socket.recv(RECEIVE_SIZE)
-			if not command: 
+			print('waiting for a command')
+			command_bytes = self.command_socket.recv(RECEIVE_SIZE)
+			if not command_bytes:
+				print('NOT a command')
 				break
-			#print 'command = ' + command
+			command = command_bytes.decode('ascii')
+			print('command = ' + command)
 
 			# gets the name of this device
 			if command == 'get_name':
-				self.command_socket.sendall(DEVICE_NAME)
+				send_bytes = DEVICE_NAME.encode('ascii')
+				self.command_socket.sendall(send_bytes)
 				
 			# gets the video and image parameters
 			elif command == 'get_video_params':
 				params = "%d,%d,%d,%d" % (WIDTH, HEIGHT, FPS, BPS)
-				self.command_socket.sendall(params)
+				send_bytes = params.encode('ascii')
+				self.command_socket.sendall(send_bytes)
 				
 			# gets a port for video, spawns a thread to wait for a connection on that port
 			elif command == 'get_video_port':
@@ -54,16 +59,17 @@ class Connection (threading.Thread):
 						self.video_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 						self.video_socket.bind(('', 0))
 						self.video_port = self.video_socket.getsockname()[1]
-						print 'video socket on port %d' % self.video_port
+						print('video socket on port %d' % self.video_port)
 					
 						# start a new video thread
 						self.video = Video(self.name, self.video_socket, self.output)
 						self.video.start()
 					
 					# report the port number back to the client
-					self.command_socket.sendall(str(self.video_port))
-				except socket.error, msg:
-					print 'Bind Error: ' + str(msg[0]) + ' - ' + msg[1]
+					send_bytes = str(self.video_port).encode('ascii')
+					self.command_socket.sendall(send_bytes)
+				except socket.error as msg:
+					print('Bind Error: ' + str(msg[0]) + ' - ' + msg[1])
 
 			# gets a port for an image, spawns a thread to wait for a connection on that port
 			elif command == 'get_image_port':
@@ -75,16 +81,17 @@ class Connection (threading.Thread):
 						image_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 						image_socket.bind(('', 0))
 						self.image_port = image_socket.getsockname()[1]
-						print 'image socket on port %d' % self.image_port
+						print('image socket on port %d' % self.image_port)
 					
 						# start a new image thread
 						self.image = Image(image_socket, self.camera)
 						self.image.start()
 					
 					# report the port number back to the client
-					self.command_socket.sendall(str(self.image_port))
-				except socket.error, msg:
-					print 'Bind Error: ' + str(msg[0]) + ' - ' + msg[1]
+					send_bytes = str(self.image_port).encode('ascii')
+					self.command_socket.sendall(send_bytes)
+				except socket.error as msg:
+					print('Bind Error: ' + str(msg[0]) + ' - ' + msg[1])
 
 		# close the connection
 		if self.video_socket is not None:
@@ -92,4 +99,4 @@ class Connection (threading.Thread):
 		if self.output.contains_connection(self.name):
 			self.output.remove_connection(self.name)
 		self.command_socket.close()
-		print 'closed command connection with ' + self.name
+		print('closed command connection with ' + self.name)

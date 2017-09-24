@@ -16,7 +16,7 @@ class Video (threading.Thread):
 		self.sock.listen(1)
 
 		conn, addr = self.sock.accept()
-		print 'video connection from ' + addr[0] + ':' + str(addr[1])
+		print('video connection from ' + addr[0] + ':' + str(addr[1]))
 		
 		# add the socket to the list of output sockets
 		self.output.add_connection(self.name, conn)

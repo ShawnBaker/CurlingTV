@@ -6,14 +6,14 @@ class MultiSocketOutput(object):
 
 	def write(self, s):
 		remove = []
-		for name, conn in self.connections.iteritems():
+		for name, conn in self.connections.items():
 			try:
 				conn.sendall(s)
-			except socket.error, msg:
-				print 'socket error'
+			except socket.error as msg:
+				print('socket error')
 				remove.append(name)
 			except socket.timeout:
-				print 'socket timeout'
+				print('socket timeout')
 		for name in remove:
 			self.remove_connection(name)
 
@@ -22,15 +22,15 @@ class MultiSocketOutput(object):
 		
 	def add_connection(self, name, conn):
 		self.connections[name] = conn
-		print 'add %d' % len(self.connections)
+		print('add %d' % len(self.connections))
 		
 	def remove_connection(self, name):
 		try:
 			self.connections[name].close()
-		except socket.error, msg:
-			print 'close socket error: ' + msg
+		except socket.error as msg:
+			print('close socket error: ' + msg)
 		del self.connections[name]
-		print 'remove %d' % len(self.connections)
+		print('remove %d' % len(self.connections))
 
 	def contains_connection(self, name):
 		return name in self.connections
