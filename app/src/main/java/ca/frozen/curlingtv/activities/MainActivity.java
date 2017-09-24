@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity
 	private CameraAdapter adapter;
 	private ScannerFragment scannerFragment;
 	private ConnectivityChangeReceiver receiver = null;
-	private int dummy = 43;
+	private int value = 43;
 
 	//******************************************************************************
 	// onCreate
@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity
 	@Override
 	protected void onSaveInstanceState(Bundle state)
 	{
-		state.putInt("dummy", dummy);
+		state.putInt("value", value);
 		super.onSaveInstanceState(state);
 	}
 
@@ -261,6 +261,7 @@ public class MainActivity extends AppCompatActivity
 	//******************************************************************************
 	private void startScanner()
 	{
+		Log.info("startScanner");
 		FragmentManager fm = getFragmentManager();
 		scannerFragment = new ScannerFragment();
 		scannerFragment.show(fm, "Scanner");
@@ -271,7 +272,8 @@ public class MainActivity extends AppCompatActivity
 	//******************************************************************************
 	private void startCameraActivity(Camera camera)
 	{
-		Intent intent = new Intent(App.getContext(), CameraActivity.class);
+		Log.info("startCameraActivity: " + camera.name);
+		Intent intent = new Intent(getApplicationContext(), CameraActivity.class);
 		intent.putExtra(CameraActivity.CAMERA, camera);
 		startActivity(intent);
 	}
@@ -281,7 +283,8 @@ public class MainActivity extends AppCompatActivity
 	//******************************************************************************
 	private void startVideoActivity(Camera camera)
 	{
-		Intent intent = new Intent(App.getContext(), VideoActivity.class);
+		Log.info("startVideoActivity: " + camera.name);
+		Intent intent = new Intent(getApplicationContext(), VideoActivity.class);
 		intent.putExtra(VideoActivity.CAMERA, camera);
 		startActivity(intent);
 	}
@@ -291,6 +294,7 @@ public class MainActivity extends AppCompatActivity
 	//******************************************************************************
 	public void updateCameras()
 	{
+		Log.info("updateCameras");
 		Collections.sort(Utils.getCameras());
 		Utils.saveData();
 		adapter.refresh();
@@ -306,10 +310,12 @@ public class MainActivity extends AppCompatActivity
 		{
 			if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION))
 			{
+				Log.info("network change");
 				if (adapter != null)
 				{
 					adapter.refresh();
 				}
+				value++;
 			}
 		}
 	}
