@@ -24,6 +24,7 @@
     <string name="get_name">get_name</string>
     <string name="get_video_params">get_video_params</string>
     <string name="get_video_port">get_video_port</string>
+    <string name="image_saved">Saved to the %s album.</string>
     <string name="initializing_video">Initializing video...</string>
     <string name="license">
         Copyright \u00a9 2016-2017 Shawn Baker\n\n
