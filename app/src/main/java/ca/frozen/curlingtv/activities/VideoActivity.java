@@ -41,6 +41,7 @@ public class VideoActivity extends AppCompatActivity implements VideoFragment.On
 		// get the camera object
 		Bundle data = getIntent().getExtras();
 		camera = data.getParcelable(CAMERA);
+		Log.info("camera: " + camera.toString());
 
 		// get the frame layout, handle system visibility changes
 		frameLayout = (FrameLayout) findViewById(R.id.video);

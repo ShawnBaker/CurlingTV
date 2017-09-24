@@ -58,6 +58,7 @@ public class Utils
 		// load the settings
 		if (settings == null)
 		{
+			Log.info("load settings");
 			if (preferences == null)
 			{
 				preferences = PreferenceManager.getDefaultSharedPreferences(App.getContext());
@@ -84,6 +85,7 @@ public class Utils
 		// load the cameras
 		if (cameras == null)
 		{
+			Log.info("load cameras");
 			if (preferences == null)
 			{
 				preferences = PreferenceManager.getDefaultSharedPreferences(App.getContext());
@@ -122,6 +124,7 @@ public class Utils
 	//******************************************************************************
 	public static void reloadData()
 	{
+		Log.info("reloadData");
 		settings = null;
 		cameras = null;
 		loadData();
@@ -136,6 +139,7 @@ public class Utils
 		SharedPreferences.Editor editor = null;
 
 		// save the settings
+		Log.info("saveData");
 		if (settings != null)
 		{
 			if (preferences == null)
