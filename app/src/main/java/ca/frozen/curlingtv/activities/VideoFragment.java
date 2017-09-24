@@ -1,8 +1,10 @@
 // Copyright © 2016-2017 Shawn Baker using the MIT License.
 package ca.frozen.curlingtv.activities;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
@@ -11,7 +13,9 @@ import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -22,6 +26,7 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
@@ -29,13 +34,13 @@ import java.util.Arrays;
 import java.util.Date;
 
 import ca.frozen.library.classes.Log;
+import ca.frozen.library.views.ZoomPanTextureView;
 import ca.frozen.curlingtv.App;
 import ca.frozen.curlingtv.R;
 import ca.frozen.curlingtv.classes.Camera;
 import ca.frozen.curlingtv.classes.Connection;
 import ca.frozen.curlingtv.classes.Utils;
 import ca.frozen.curlingtv.classes.VideoParams;
-import ca.frozen.library.views.ZoomPanTextureView;
 
 public class VideoFragment extends Fragment implements TextureView.SurfaceTextureListener
 {
@@ -56,6 +61,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 	private final static int FADEOUT_TIMEOUT = 5000;
 	private final static int FADEOUT_ANIMATION_TIME = 500;
 	private final static int FADEIN_ANIMATION_TIME = 400;
+	private final static int REQUEST_WRITE_EXTERNAL_STORAGE = 73;
 
 	// instance variables
 	private Camera camera;
@@ -101,6 +107,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 		// get the parameters
 		camera = getArguments().getParcelable(CAMERA);
 		fullScreen = getArguments().getBoolean(FULL_SCREEN);
+		Log.info("camera: " + camera.toString());
 
 		// create the fade in handler and runnable
 		fadeInHandler = new Handler();
@@ -173,6 +180,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 		View view = inflater.inflate(R.layout.fragment_video, container, false);
+
 		// configure the name
 		nameView = (TextView) view.findViewById(R.id.video_name);
 		nameView.setText(camera.name);
@@ -214,12 +222,17 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 			@Override
 			public void onClick(View view)
 			{
-				Bitmap image = textureView.getBitmap();
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss");
-				String name = camera.network + "_" + camera.name.replaceAll("\\s+", "") + "_" + sdf.format(new Date()) + ".jpg";
-				String url = Utils.saveImage(getActivity().getContentResolver(), image, name, null);
-				MediaActionSound sound = new MediaActionSound();
-				sound.play(MediaActionSound.SHUTTER_CLICK);
+				int check = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+				if (check != PackageManager.PERMISSION_GRANTED)
+				{
+					Log.info("ask for external storage permission");
+					requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+										REQUEST_WRITE_EXTERNAL_STORAGE);
+				}
+				else
+				{
+					takeSnapshot();
+				}
 			}
 		});
 
@@ -234,6 +247,21 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 		}
 
 		return view;
+	}
+
+	//******************************************************************************
+	// onRequestPermissionsResult
+	//******************************************************************************
+	@Override
+	public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
+	{
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+		if (requestCode == REQUEST_WRITE_EXTERNAL_STORAGE && grantResults.length > 0 &&
+			grantResults[0] == PackageManager.PERMISSION_GRANTED)
+		{
+			Log.info("external storage permission granted");
+			takeSnapshot();
+		}
 	}
 
 	//******************************************************************************
@@ -383,6 +411,30 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 	private void stopFadeOutTimer()
 	{
 		fadeOutHandler.removeCallbacks(fadeOutRunner);
+	}
+
+	//******************************************************************************
+	// takeSnapshot
+	//******************************************************************************
+	private void takeSnapshot()
+	{
+		// get the snapshot image
+		Bitmap image = textureView.getBitmap();
+
+		// save the image
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss");
+		String name = camera.network + "_" + camera.name.replaceAll("\\s+", "") + "_" + sdf.format(new Date()) + ".jpg";
+		Utils.saveImage(getActivity().getContentResolver(), image, name, null);
+		Log.info("takeSnapshot: " + name);
+
+		// play the shutter sound
+		MediaActionSound sound = new MediaActionSound();
+		sound.play(MediaActionSound.SHUTTER_CLICK);
+
+		// display a message
+		String msg = String.format(getString(R.string.image_saved), getString(R.string.app_name));
+		Toast toast = Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT);
+		toast.show();
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
