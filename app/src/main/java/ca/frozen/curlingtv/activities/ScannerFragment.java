@@ -38,6 +38,7 @@ public class ScannerFragment extends DialogFragment
 	private Button cancelButton = null;
 	private Runnable dismissRunner;
 	private Handler dismissHandler = new Handler();
+	private String savedTag;
 
 	//******************************************************************************
 	// onCreate
@@ -49,6 +50,7 @@ public class ScannerFragment extends DialogFragment
 		setRetainInstance(true);
 
 		// initialize the logger
+		savedTag = Log.getTag();
 		Utils.initLogFile(getClass().getSimpleName());
 
 		// load the settings and cameras
@@ -121,12 +123,7 @@ public class ScannerFragment extends DialogFragment
 			DeviceScanner scanner = (scannerWeakRef != null) ? scannerWeakRef.get() : null;
 			if (scanner != null)
 			{
-				boolean complete = scanner.isComplete();
-				scanner.setStatus(complete);
-				if (complete)
-				{
-					cancelButton.setText(App.getStr(R.string.done));
-				}
+				scanner.setStatus(scanner.isComplete());
 			}
 		}
 
@@ -145,6 +142,7 @@ public class ScannerFragment extends DialogFragment
 			getDialog().setDismissMessage(null);
 		}
 		super.onDestroyView();
+		Log.setTag(savedTag);
 	}
 
 	//******************************************************************************
@@ -163,7 +161,7 @@ public class ScannerFragment extends DialogFragment
 	////////////////////////////////////////////////////////////////////////////////
 	// DeviceScanner
 	////////////////////////////////////////////////////////////////////////////////
-	private class DeviceScanner extends AsyncTask<Void, Void, Void>
+	private class DeviceScanner extends AsyncTask<Void, Boolean, Void>
 	{
 		// local constants
 		private final static int NO_DEVICE = -1;
@@ -267,7 +265,7 @@ public class ScannerFragment extends DialogFragment
 				{
 					addCameras();
 				}
-				setStatus(true);
+				publishProgress(true);
 			}
 			return null;
 		}
@@ -279,22 +277,25 @@ public class ScannerFragment extends DialogFragment
 		protected void onPostExecute(Void unused)
 		{
 			Log.info("onPostExecute");
-			final MainActivity activity = getActivity(cancelButton);
+			MainActivity activity = getActivity(cancelButton);
 			if (activity != null)
 			{
-				activity.runOnUiThread(new Runnable()
+				cancelButton.setText(App.getStr(R.string.done));
+				if (newCameras.size() > 0)
 				{
-					public void run()
-					{
-						cancelButton.setText(App.getStr(R.string.done));
-						if (newCameras.size() > 0)
-						{
-							activity.updateCameras();
-							dismissHandler.postDelayed(dismissRunner, DISMISS_TIMEOUT);
-						}
-					}
-				});
+					activity.updateCameras();
+					dismissHandler.postDelayed(dismissRunner, DISMISS_TIMEOUT);
+				}
 			}
+		}
+
+		//******************************************************************************
+		// onProgressUpdate
+		//******************************************************************************
+		@Override
+		protected void onProgressUpdate(Boolean... values)
+		{
+			setStatus(values[0]);
 		}
 
 		//******************************************************************************
@@ -352,34 +353,28 @@ public class ScannerFragment extends DialogFragment
 		private synchronized void doneDevice(int device)
 		{
 			numDone++;
-			setStatus(false);
+			publishProgress(false);
 		}
 
 		//******************************************************************************
 		// setStatus
 		//******************************************************************************
-		private synchronized void setStatus(final boolean last)
+		private synchronized void setStatus(boolean last)
 		{
-			MainActivity activity = getActivity(status);
-			if (activity != null)
+			message.setText(String.format(App.getStr(R.string.scanning_on_port), settings.port));
+			progress.setProgress(numDone);
+			status.setText(String.format(App.getStr(R.string.num_new_cameras_found), newCameras.size()));
+			if (newCameras.size() > 0)
 			{
-				activity.runOnUiThread(new Runnable()
-				{
-					public void run()
-					{
-						message.setText(String.format(App.getStr(R.string.scanning_on_port), settings.port));
-						progress.setProgress(numDone);
-						status.setText(String.format(App.getStr(R.string.num_new_cameras_found), newCameras.size()));
-						if (newCameras.size() > 0)
-						{
-							status.setTextColor(ContextCompat.getColor(App.getContext(), R.color.good_text));
-						}
-						else if (last)
-						{
-							status.setTextColor(ContextCompat.getColor(App.getContext(), R.color.bad_text));
-						}
-					}
-				});
+				status.setTextColor(ContextCompat.getColor(App.getContext(), R.color.good_text));
+			}
+			else if (last)
+			{
+				status.setTextColor(ContextCompat.getColor(App.getContext(), R.color.bad_text));
+			}
+			if (last)
+			{
+				cancelButton.setText(App.getStr(R.string.done));
 			}
 		}
 
