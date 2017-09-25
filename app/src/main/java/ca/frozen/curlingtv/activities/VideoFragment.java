@@ -437,6 +437,26 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 		toast.show();
 	}
 
+	//******************************************************************************
+	// stop
+	//******************************************************************************
+	public void stop()
+	{
+		if (decoder != null)
+		{
+			messageView.setText(R.string.closing_video);
+			messageView.setTextColor(App.getClr(R.color.good_text));
+			messageView.setVisibility(View.VISIBLE);
+			decoder.interrupt();
+			try
+			{
+				decoder.join(Connection.COMMAND_TIMEOUT * 2);
+			}
+			catch (Exception ex) {}
+			decoder = null;
+		}
+	}
+
 	////////////////////////////////////////////////////////////////////////////////
 	// DecoderThread
 	////////////////////////////////////////////////////////////////////////////////
@@ -455,6 +475,9 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 		private boolean decoding = false;
 		private Surface surface;
 		private byte[] buffer = null;
+		private long presentationTime = System.nanoTime() / 1000;
+		private long presentationTimeInc = 66666;
+		private ByteBuffer[] inputBuffers = null;
 		private int videoPort;
 		private Connection commandConnection = null;
 		private Connection videoConnection = null;
@@ -542,10 +565,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 			int nalLen = 0;
 			int numZeroes = 0;
 			int numReadErrors = 0;
-			long presentationTime = System.nanoTime() / 1000;
 			boolean gotSPS = false;
-			boolean gotHeader = false;
-			ByteBuffer[] inputBuffers = null;
 
 			try
 			{
@@ -568,6 +588,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 				decoder.configure(format, surface, null, 0);
 				setDecodingState(true);
 				inputBuffers = decoder.getInputBuffers();
+				presentationTimeInc = 1000000 / params.fps;
 
 				// get the video port and create the video connection
 				videoPort = commandConnection.getVideoPort();
@@ -578,74 +599,77 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 				}
 
 				// read from the source
-				while (!Thread.interrupted())
+				while (!isInterrupted())
 				{
 					// read from the stream
 					int len = videoConnection.read(buffer);
-					if (Thread.interrupted()) break;
+					if (isInterrupted()) break;
 					//Log.info(String.format("len = %d", len));
 
 					// process the input buffer
 					if (len > 0)
 					{
 						numReadErrors = 0;
-						for (int i = 0; i < len && !Thread.interrupted(); i++)
+						for (int i = 0; i < len && !isInterrupted(); i++)
 						{
+							// add the byte to the NAL
+							if (nalLen == nal.length)
+							{
+								nal = Arrays.copyOf(nal, nal.length + NAL_SIZE_INC);
+								if (isInterrupted()) break;
+								//Log.info(String.format("NAL size: %d", nal.length));
+							}
+							nal[nalLen++] = buffer[i];
+
+							// process the byte
 							if (buffer[i] == 0)
 							{
 								numZeroes++;
 							}
 							else
 							{
-								if (buffer[i] == 1)
+								if (buffer[i] == 1 && numZeroes == 3)
 								{
-									if (numZeroes == 3)
+									// get the NAL type
+									nalLen -= 4;
+									int nalType = (nalLen > 4 && nal[0] == 0 && nal[1] == 0 && nal[2] == 0 && nal[3] == 1) ? (nal[4] & 0x1F) : -1;
+
+									// process the first SPS record we encounter
+									if (nalType == 7 && !gotSPS)
 									{
-										if (gotHeader)
-										{
-											nalLen -= numZeroes;
-											if (!gotSPS && (nal[numZeroes + 1] & 0x1F) == 7)
-											{
-												hideMessage();
-												startVideoHandler.post(startVideoRunner);
-												gotSPS = true;
-											}
-											if (gotSPS)
-											{
-												int index = decoder.dequeueInputBuffer(BUFFER_TIMEOUT);
-												if (Thread.interrupted()) break;
-												if (index >= 0)
-												{
-													ByteBuffer inputBuffer = inputBuffers[index];
-													//ByteBuffer inputBuffer = decoder.getInputBuffer(index);
-													inputBuffer.put(nal, 0, nalLen);
-													decoder.queueInputBuffer(index, 0, nalLen, presentationTime, 0);
-													presentationTime += 66666;
-													if (Thread.interrupted()) break;
-												}
-											}
-											//Log.info(String.format("NAL: %d  %d", nalLen, index));
-										}
-										for (int j = 0; j < numZeroes; j++)
-										{
-											nal[j] = 0;
-										}
-										nalLen = numZeroes;
-										gotHeader = true;
+										hideMessage();
+										startVideoHandler.post(startVideoRunner);
+										gotSPS = true;
+										if (isInterrupted()) break;
 									}
+
+									// reset the buffer for invalid NALs
+									if (nalType == -1)
+									{
+										nal[0] = nal[1] = nal[2] = 0;
+										nal[3] = 1;
+									}
+
+									// process valid NALs after getting the first SPS record
+									else if (gotSPS)
+									{
+										int index = decoder.dequeueInputBuffer(presentationTimeInc);
+										if (isInterrupted()) break;
+										if (index >= 0)
+										{
+											ByteBuffer inputBuffer = inputBuffers[index];
+											//ByteBuffer inputBuffer = decoder.getInputBuffer(index);
+											inputBuffer.put(nal, 0, nalLen);
+											if (isInterrupted()) break;
+											decoder.queueInputBuffer(index, 0, nalLen, presentationTime, 0);
+											presentationTime += presentationTimeInc;
+											if (isInterrupted()) break;
+										}
+										//Log.info(String.format("dequeueInputBuffer index = %d", index));
+									}
+									nalLen = 4;
 								}
 								numZeroes = 0;
-							}
-
-							// add the byte to the NAL
-							if (gotHeader)
-							{
-								if (nalLen == nal.length)
-								{
-									nal = Arrays.copyOf(nal, nal.length + NAL_SIZE_INC);
-									//Log.info(String.format("NAL size: %d", nal.length));
-								}
-								nal[nalLen++] = buffer[i];
 							}
 						}
 					}
@@ -660,14 +684,20 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 						//Log.info("len == 0");
 					}
 
-					// send an output buffer to the surface
-					if (Thread.interrupted()) break;
-					MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
-					int index = decoder.dequeueOutputBuffer(info, BUFFER_TIMEOUT);
-					if (Thread.interrupted()) break;
-					if (index >= 0)
+					// send output buffers to the surface
+					if (gotSPS)
 					{
-						decoder.releaseOutputBuffer(index, true);
+						MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
+						int index = decoder.dequeueOutputBuffer(info, BUFFER_TIMEOUT);
+						if (isInterrupted()) break;
+						while (index >= 0)
+						{
+							decoder.releaseOutputBuffer(index, true);
+							if (isInterrupted()) break;
+							index = decoder.dequeueOutputBuffer(info, BUFFER_TIMEOUT);
+							if (isInterrupted()) break;
+						}
+						if (isInterrupted()) break;
 					}
 				}
 			}
@@ -683,7 +713,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 				{
 					setMessage(R.string.error_lost_connection);
 				}
-				//Log.info(ex.toString());
+				Log.error(ex.toString());
 				ex.printStackTrace();
 			}
 
