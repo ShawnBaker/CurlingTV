@@ -131,7 +131,7 @@ public class CameraActivity extends AppCompatActivity
 		@Override
 		protected Integer doInBackground(String... params)
 		{
-			Connection commandConnection = new Connection(camera.address, camera.port, Connection.COMMAND_TIMEOUT);
+			Connection commandConnection = new Connection(camera.address, camera.port, Connection.CONNECT_TIMEOUT);
 			if (commandConnection.isConnected())
 			{
 				videoParams = commandConnection.getVideoParams();
@@ -157,9 +157,9 @@ public class CameraActivity extends AppCompatActivity
 		@Override
 		protected Integer doInBackground(String... params)
 		{
-			Connection commandConnection = new Connection(camera.address, camera.port, Connection.COMMAND_TIMEOUT);
+			Connection commandConnection = new Connection(camera.address, camera.port, Connection.CONNECT_TIMEOUT);
 			int imagePort = commandConnection.getImagePort();
-			Connection imageConnection = new Connection(camera.address, imagePort, Connection.IMAGE_TIMEOUT);
+			Connection imageConnection = new Connection(camera.address, imagePort, Connection.CONNECT_TIMEOUT);
 			if (imageConnection.isConnected())
 			{
 				byte[] buffer = new byte[4];

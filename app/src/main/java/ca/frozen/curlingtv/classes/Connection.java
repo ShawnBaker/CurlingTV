@@ -15,9 +15,7 @@ public class Connection
 {
 	// public constants
 	public final static int QUERY_TIMEOUT = 500;
-	public final static int COMMAND_TIMEOUT = 1000;
-	public final static int VIDEO_TIMEOUT = 400;
-	public final static int IMAGE_TIMEOUT = 400;
+	public final static int CONNECT_TIMEOUT = 1000;
 
 	// instance variables
 	private Socket socket = null;

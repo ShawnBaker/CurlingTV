@@ -450,7 +450,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 			decoder.interrupt();
 			try
 			{
-				decoder.join(Connection.COMMAND_TIMEOUT * 2);
+				decoder.join(Connection.CONNECT_TIMEOUT * 2);
 			}
 			catch (Exception ex) {}
 			decoder = null;
@@ -574,7 +574,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 
 				// create the command connection
 				buffer = new byte[BUFFER_SIZE];
-				commandConnection = new Connection(camera.address, camera.port, Connection.COMMAND_TIMEOUT);
+				commandConnection = new Connection(camera.address, camera.port, Connection.CONNECT_TIMEOUT);
 				if (!commandConnection.isConnected())
 				{
 					throw new Exception();
@@ -592,7 +592,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 
 				// get the video port and create the video connection
 				videoPort = commandConnection.getVideoPort();
-				videoConnection = new Connection(camera.address, videoPort, Connection.VIDEO_TIMEOUT);
+				videoConnection = new Connection(camera.address, videoPort, Connection.CONNECT_TIMEOUT);
 				if (!videoConnection.isConnected())
 				{
 					throw new Exception();
