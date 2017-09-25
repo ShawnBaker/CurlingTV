@@ -95,6 +95,7 @@ class Connection (threading.Thread):
 
 		# close the connection
 		if self.video_socket is not None:
+			print('close video socket ' + self.name)
 			self.video_socket.close()
 		if self.output.contains_connection(self.name):
 			self.output.remove_connection(self.name)
