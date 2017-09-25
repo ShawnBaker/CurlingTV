@@ -34,6 +34,7 @@ public class Connection
 			socket = new Socket();
 			InetSocketAddress socketAddress = new InetSocketAddress(address, port);
 			socket.connect(socketAddress, timeout);
+			socket.setSoTimeout(timeout);
 			inputStream = socket.getInputStream();
 			outputStream = socket.getOutputStream();
 		}
