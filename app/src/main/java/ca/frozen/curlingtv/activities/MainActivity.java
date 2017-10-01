@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 import ca.frozen.library.classes.Log;
-import ca.frozen.curlingtv.App;
+import ca.frozen.curlingtv.BuildConfig;
 import ca.frozen.curlingtv.classes.Camera;
 import ca.frozen.curlingtv.classes.CameraAdapter;
 import ca.frozen.curlingtv.classes.Utils;
@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity
 
 		// initialize the logger
 		Utils.initLogFile(getClass().getSimpleName());
+		Log.info(getString(R.string.app_name) + " " + BuildConfig.VERSION_NAME);
 
 		// load the settings and cameras
 		Utils.loadData();
