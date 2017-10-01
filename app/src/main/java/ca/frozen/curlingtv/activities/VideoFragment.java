@@ -463,7 +463,6 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 	private class DecoderThread extends Thread
 	{
 		// local constants
-		private final static int BUFFER_TIMEOUT = 10000;
 		private final static int FINISH_TIMEOUT = 5000;
 		private final static int BUFFER_SIZE = 16384;
 		private final static int NAL_SIZE_INC = 4096;
@@ -653,7 +652,7 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 									// process valid NALs after getting the first SPS record
 									else if (gotSPS)
 									{
-										int index = decoder.dequeueInputBuffer(presentationTimeInc);
+										int index = decoder.dequeueInputBuffer(0);
 										if (isInterrupted()) break;
 										if (index >= 0)
 										{
@@ -688,13 +687,13 @@ public class VideoFragment extends Fragment implements TextureView.SurfaceTextur
 					if (gotSPS)
 					{
 						MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
-						int index = decoder.dequeueOutputBuffer(info, BUFFER_TIMEOUT);
+						int index = decoder.dequeueOutputBuffer(info, 0);
 						if (isInterrupted()) break;
 						while (index >= 0)
 						{
 							decoder.releaseOutputBuffer(index, true);
 							if (isInterrupted()) break;
-							index = decoder.dequeueOutputBuffer(info, BUFFER_TIMEOUT);
+							index = decoder.dequeueOutputBuffer(info, 0);
 							if (isInterrupted()) break;
 						}
 						if (isInterrupted()) break;
