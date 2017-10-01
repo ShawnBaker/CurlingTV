@@ -1,21 +1,32 @@
 import atexit
+import logging
 import picamera
 import socket
 import sys
 from threading import *
 from connection import *
+from logging.handlers import RotatingFileHandler
 from multi_socket_output import *
 from settings import *
 
 MAX_CONNECTIONS = 10
 PORT = 43334
 
+# create the logger
+logger = logging.getLogger("camera")
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+handler = RotatingFileHandler("camera.log", maxBytes=1000000, backupCount=5)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
 # create the exit handler
 def exit_handler():
 	sock.close()
-	print('socket closed')
+	logger.info('socket closed')
+	
 atexit.register(exit_handler)
-print('exit handler registered')
+logger.info('exit handler registered')
 
 # create the threads dictionary
 threads = {}
@@ -30,26 +41,26 @@ camera.start_recording(output, format='h264', bitrate=BPS)
 
 # create the socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print('socket created')
+logger.info('socket created')
 
 # bind the socket
 try:
 	sock.bind(('', PORT))
 except socket.error as msg:
-	print('Bind Error: ' + str(msg[0]) + ' - ' + msg[1])
+	logger.error('Bind Error: ' + str(msg[0]) + ' - ' + msg[1])
 	sys.exit()
-print('bind complete')
+logger.info('bind complete')
  
 # listen to the socket
 sock.listen(MAX_CONNECTIONS)
-print('listening')
+logger.info('listening')
 
 # create a thread for each connection
 while True:
 	# wait for a connection
 	conn, addr = sock.accept()
 	name = addr[0] + ':' + str(addr[1])
-	print('command connection from ' + name)
+	logger.info('command connection from ' + name)
 	 
 	# start a new connection thread
 	thread = Connection(name, conn, camera, output)

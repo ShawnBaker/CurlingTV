@@ -1,8 +1,10 @@
+import logging
 import picamera
 
 class MultiSocketOutput(object):
 	def __init__(self):
 		self.connections = {}
+		self.logger = logging.getLogger("camera")
 
 	def write(self, s):
 		remove = []
@@ -10,27 +12,27 @@ class MultiSocketOutput(object):
 			try:
 				conn.sendall(s)
 			except socket.error as msg:
-				print('socket error')
+				self.logger.error('socket error')
 				remove.append(name)
 			except socket.timeout:
-				print('socket timeout')
+				self.logger.error('socket timeout')
 		for name in remove:
 			self.remove_connection(name)
 
 	def flush(self):
-		print('flush')
+		self.logger.info('flush')
 		
 	def add_connection(self, name, conn):
 		self.connections[name] = conn
-		print('add %d' % len(self.connections))
+		self.logger.info('add %d' % len(self.connections))
 		
 	def remove_connection(self, name):
 		try:
 			self.connections[name].close()
 		except socket.error as msg:
-			print('close socket error: ' + msg)
+			self.logger.error('close socket error: ' + msg)
 		del self.connections[name]
-		print('remove %d' % len(self.connections))
+		self.logger.info('remove %d' % len(self.connections))
 
 	def contains_connection(self, name):
 		return name in self.connections

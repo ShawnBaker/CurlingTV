@@ -1,3 +1,4 @@
+import logging
 import socket
 import threading
 from multi_socket_output import *
@@ -21,19 +22,20 @@ class Connection (threading.Thread):
 		self.video_port = 0
 		self.image = None
 		self.image_port = 0
+		self.logger = logging.getLogger("camera")
 
 	def run(self):
 		# read commands forever
 		while True:
 			 
 			# read a command from the client
-			print('waiting for a command')
+			self.logger.info('waiting for a command')
 			command_bytes = self.command_socket.recv(RECEIVE_SIZE)
 			if not command_bytes:
-				print('NOT a command')
+				self.logger.info('socket closed')
 				break
 			command = command_bytes.decode('ascii')
-			print('command = ' + command)
+			self.logger.info('command = ' + command)
 
 			# gets the name of this device
 			if command == 'get_name':
@@ -59,7 +61,7 @@ class Connection (threading.Thread):
 						self.video_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 						self.video_socket.bind(('', 0))
 						self.video_port = self.video_socket.getsockname()[1]
-						print('video socket on port %d' % self.video_port)
+						self.logger.info('video socket on port %d' % self.video_port)
 					
 						# start a new video thread
 						self.video = Video(self.name, self.video_socket, self.output)
@@ -69,7 +71,7 @@ class Connection (threading.Thread):
 					send_bytes = str(self.video_port).encode('ascii')
 					self.command_socket.sendall(send_bytes)
 				except socket.error as msg:
-					print('Bind Error: ' + str(msg[0]) + ' - ' + msg[1])
+					self.logger.error('Bind Error: ' + str(msg[0]) + ' - ' + msg[1])
 
 			# gets a port for an image, spawns a thread to wait for a connection on that port
 			elif command == 'get_image_port':
@@ -81,7 +83,7 @@ class Connection (threading.Thread):
 						image_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 						image_socket.bind(('', 0))
 						self.image_port = image_socket.getsockname()[1]
-						print('image socket on port %d' % self.image_port)
+						self.logger.info('image socket on port %d' % self.image_port)
 					
 						# start a new image thread
 						self.image = Image(image_socket, self.camera)
@@ -91,13 +93,13 @@ class Connection (threading.Thread):
 					send_bytes = str(self.image_port).encode('ascii')
 					self.command_socket.sendall(send_bytes)
 				except socket.error as msg:
-					print('Bind Error: ' + str(msg[0]) + ' - ' + msg[1])
+					self.logger.error('Bind Error: ' + str(msg[0]) + ' - ' + msg[1])
 
 		# close the connection
 		if self.video_socket is not None:
-			print('close video socket ' + self.name)
+			self.logger.info('close video socket ' + self.name)
 			self.video_socket.close()
 		if self.output.contains_connection(self.name):
 			self.output.remove_connection(self.name)
 		self.command_socket.close()
-		print('closed command connection with ' + self.name)
+		self.logger.info('closed command connection with ' + self.name)

@@ -1,4 +1,5 @@
 import io
+import logging
 import socket
 import struct
 import threading
@@ -11,36 +12,37 @@ class Image (threading.Thread):
 		threading.Thread.__init__(self)
 		self.sock = sock
 		self.camera = camera
+		self.logger = logging.getLogger("camera")
 
 	def run(self):
 		# list for one connection
 		self.sock.listen(1)
-		print('image: listening')
+		self.logger.info('image: listening')
 
 		# wait for the client to connect
 		conn, addr = self.sock.accept()
-		print('image: connection from ' + addr[0] + ':' + str(addr[1]))
+		self.logger.info('image: connection from ' + addr[0] + ':' + str(addr[1]))
 		connFile = conn.makefile('wb')
 
 		# get an image from the camera
 		stream = io.BytesIO()
 		#camera = picamera.PiCamera()
 		self.camera.capture(stream, 'jpeg', use_video_port=True)
-		print('image: captured size = ' + str(stream.tell()))
+		self.logger.info('image: captured size = ' + str(stream.tell()))
 
 		# write the image length
 		connFile.write(struct.pack('<L', stream.tell()))
 		connFile.flush()
-		print('image: wrote size')
+		self.logger.info('image: wrote size')
 			
 		# write the image data
 		stream.seek(0)
 		connFile.write(stream.read())
-		print('image: wrote data')
+		self.logger.info('image: wrote data')
 
 		# close the connection
 		connFile.close()
 		conn.close()
 		self.sock.close()
-		print('image: closed')
+		self.logger.info('image: closed')
 	
